@@ -59,7 +59,7 @@ class Data_Loader():
         loader = torch.utils.data.DataLoader(dataset=dataset,
                                               batch_size=self.batch,
                                               shuffle=self.shuf,
-                                              num_workers=2,
-                                              drop_last=True)
+                                              num_workers=2, # subprocess number
+                                              drop_last=True) # drop if incomplete batch size
         return loader
 
