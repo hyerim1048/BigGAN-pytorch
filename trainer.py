@@ -87,7 +87,8 @@ class Trainer(object):
         step_per_epoch = len(self.data_loader)
         model_save_step = int(self.model_save_step * step_per_epoch)
 
-        # Fixed input for debugging
+        # Fixed input for debugging # random variable 하나 만듦 grad=False
+        # Norm(0,1) # batch_size * z_dim
         fixed_z = tensor2var(torch.randn(self.batch_size, self.z_dim))
 
         # Start with trained model
@@ -219,7 +220,8 @@ class Trainer(object):
 
     def build_model(self):
         # code_dim=100, n_class=1000
-        self.G = Generator(self.z_dim, self.n_class, chn=self.chn).to(self.device)
+        self.G = Generator(self.z_dim, self.n_class, chn=self.chn).to(self.device) 
+        # z =120, n_class=image file path len, chn = 64 channel number?
         self.D = Discriminator(self.n_class, chn=self.chn).to(self.device)
         if self.parallel:
             print('use parallel...')
@@ -227,6 +229,8 @@ class Trainer(object):
             gpus = [int(i) for i in self.gpus.split(',')]
     
             self.G = nn.DataParallel(self.G, device_ids=gpus)
+            # mini batch 를 더 작은  minibatch 로 자른 후 병렬적으로 처리
+            # http://pytorch.kr/beginner/former_torchies/parallelism_tutorial.html
             self.D = nn.DataParallel(self.D, device_ids=gpus)
 
         # self.G.apply(weights_init)
