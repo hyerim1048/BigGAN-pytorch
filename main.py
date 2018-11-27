@@ -15,10 +15,12 @@ def main(config):
 
 
     config.n_class = len(glob.glob(os.path.join(config.image_path, '*/')))
-    print('number class:', config.n_class)
+    print('number class:', config.n_class) # image 개수 = class?
     # Data loader
     data_loader = Data_Loader(config.train, config.dataset, config.image_path, config.imsize,
                              config.batch_size, shuf=config.train)
+    # Data Loader Init
+    #https://discuss.pytorch.org/t/how-to-load-lsun-datasets/1858/2
 
     # Create directories if not exist
     make_folder(config.model_save_path, config.version)
@@ -29,7 +31,7 @@ def main(config):
 
     print('config data_loader and build logs folder')
 
-    if config.train:
+    if config.train: # model init
         if config.model=='sagan':
             trainer = Trainer(data_loader.loader(), config)
         elif config.model == 'qgan':
