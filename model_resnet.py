@@ -216,13 +216,15 @@ class Generator(nn.Module):
         super().__init__()
 
         self.linear = SpectralNorm(nn.Linear(n_class, 128, bias=False))
+        # in : n_class, out = 128 (y = Wx)
         
         if debug:
             chn = 8
 
-        self.first_view = 16 * chn
+        self.first_view = 16 * chn #?
 
         self.G_linear = SpectralNorm(nn.Linear(20, 4 * 4 * 16 * chn))
+        
 
         self.conv = nn.ModuleList([GBlock(16*chn, 16*chn, n_class=n_class),
                                 GBlock(16*chn, 8*chn, n_class=n_class),
