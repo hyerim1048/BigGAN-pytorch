@@ -216,7 +216,7 @@ class Generator(nn.Module):
         super().__init__()
 
         self.linear = SpectralNorm(nn.Linear(n_class, 128, bias=False))
-        # in : n_class, out : 128 (y = Wx)
+        # in : n_class, out : 120 (y = Wx)
         
         if debug:
             chn = 8
@@ -238,7 +238,7 @@ class Generator(nn.Module):
         self.colorize = SpectralNorm(nn.Conv2d(1*chn, 3, [3, 3], padding=1))
 
     def forward(self, input, class_id):
-        codes = torch.split(input, 20, 1) # input을 (2nd dim)20차원으로 쪼갠다. (1,128) -> (1,20)
+        codes = torch.split(input, 20, 1) # input을 (2nd dim)20차원으로 쪼갠다. (1,120) -> (1,20) * 6
         class_emb = self.linear(class_id)  # 128 dim
 
         out = self.G_linear(codes[0]) 
