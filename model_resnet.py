@@ -216,21 +216,21 @@ class Generator(nn.Module):
         super().__init__()
 
         self.linear = SpectralNorm(nn.Linear(n_class, 128, bias=False))
-        # in : n_class, out = 128 (y = Wx)
+        # in : n_class, out : 128 (y = Wx)
         
         if debug:
             chn = 8
 
-        self.first_view = 16 * chn #?
+        self.first_view = 16 * chn 
 
         self.G_linear = SpectralNorm(nn.Linear(20, 4 * 4 * 16 * chn))
         
 
-        self.conv = nn.ModuleList([GBlock(16*chn, 16*chn, n_class=n_class),
+        self.conv = nn.ModuleList([GBlock(16*chn, 16*chn, n_class=n_class), # res block
                                 GBlock(16*chn, 8*chn, n_class=n_class),
                                 GBlock(8*chn, 4*chn, n_class=n_class),
                                 GBlock(4*chn, 2*chn, n_class=n_class),
-                                SelfAttention(2*chn),
+                                SelfAttention(2*chn), # non-local block
                                 GBlock(2*chn, 1*chn, n_class=n_class)])
 
         # TODO impl ScaledCrossReplicaBatchNorm 
@@ -238,30 +238,31 @@ class Generator(nn.Module):
         self.colorize = SpectralNorm(nn.Conv2d(1*chn, 3, [3, 3], padding=1))
 
     def forward(self, input, class_id):
-        codes = torch.split(input, 20, 1)
-        class_emb = self.linear(class_id)  # 128
+        codes = torch.split(input, 20, 1) # input을 (2nd dim)20차원으로 쪼갠다. (1,128) -> (1,20)
+        class_emb = self.linear(class_id)  # 128 dim
 
-        out = self.G_linear(codes[0])
+        out = self.G_linear(codes[0]) 
+        # 자른 input의 1번째를 dense블럭 태우고 spectral norm 한다.
         # out = out.view(-1, 1536, 4, 4)
-        out = out.view(-1, self.first_view, 4, 4)
+        out = out.view(-1, self.first_view, 4, 4) # (input의 1st dim = 1, chn * 16 , 4, 4) 로 변환
         ids = 1
         for i, conv in enumerate(self.conv):
             if isinstance(conv, GBlock):
                 
                 conv_code = codes[ids]
                 ids = ids+1
-                condition = torch.cat([conv_code, class_emb], 1)
+                condition = torch.cat([conv_code, class_emb], 1) # class embedding과 z를 쪼갠 것을 concat시킨다.
                 # print('condition',condition.size()) #torch.Size([4, 148])
-                out = conv(out, condition)
+                out = conv(out, condition) # conv block 에 condidion을 넣는다.
 
             else:
-                out = conv(out)
+                out = conv(out) # non local block에는 condition을 주지 않는다.
 
         out = self.ScaledCrossReplicaBN(out)
-        out = F.relu(out)
+        out = F.relu(out) # relu
         out = self.colorize(out)
 
-        return F.tanh(out)
+        return F.tanh(out) # tanh 블럭 통과! 
 
 
 class Discriminator(nn.Module):
