@@ -171,7 +171,7 @@ class Trainer(object):
             # ================== Train G and gumbel ================== #
             # Create random noise
             z = torch.randn(self.batch_size, self.z_dim).to(self.device)
-            z_class, z_class_one_hot = self.label_sampel()
+            z_class, z_class_one_hot = self.label_sampel() # int array와 n_class 차원의 one hot array를 뱉어준다.
             
             fake_images = self.G(z, z_class_one_hot)
 
@@ -180,7 +180,7 @@ class Trainer(object):
             if self.adv_loss == 'wgan-gp':
                 g_loss_fake = - g_out_fake.mean()
             elif self.adv_loss == 'hinge':
-                g_loss_fake = - g_out_fake.mean()
+                g_loss_fake = - g_out_fake.mean() # g_out_fake mean
 
             self.reset_grad()
             g_loss_fake.backward()
