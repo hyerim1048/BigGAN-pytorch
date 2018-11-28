@@ -18,9 +18,9 @@ class Spectral_Norm:
         weight = getattr(module, self.name + '_orig')
         u = getattr(module, self.name + '_u')
         size = weight.size()
-        weight_mat = weight.contiguous().view(size[0], -1)
+        weight_mat = weight.contiguous().view(size[0], -1) 
         with torch.no_grad():
-            v = weight_mat.t() @ u
+            v = weight_mat.t() @ u # matrix multiplication (W transpose @ u)
             v = v / v.norm()
             u = weight_mat @ v
             u = u / u.norm()
@@ -174,7 +174,7 @@ class GBlock(nn.Module):
         self.activation = activation
         self.bn = bn
         if bn:
-            self.HyperBN = ConditionalNorm(in_channel, 148)
+            self.HyperBN = ConditionalNorm(in_channel, 148) # concat(z and c)
             self.HyperBN_1 = ConditionalNorm(out_channel, 148)
 
     def forward(self, input, condition=None):
@@ -183,7 +183,7 @@ class GBlock(nn.Module):
         if self.bn:
             # print('condition',condition.size()) #condition torch.Size([4, 148])
             out = self.HyperBN(out, condition)
-        out = self.activation(out)
+        out = self.activation(out) # relu
         if self.upsample:
             # TODO different form papers
             out = F.upsample(out, scale_factor=2)
