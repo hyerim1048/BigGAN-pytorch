@@ -308,8 +308,8 @@ class Discriminator(nn.Module):
         # print(out.size())
         out = self.conv(out)
         out = F.relu(out)
-        out = out.view(out.size(0), out.size(1), -1)
-        out = out.sum(2)
+        out = out.view(out.size(0), out.size(1), -1) # 3차원이상 묶고
+        out = out.sum(2) # 더함
         out_linear = self.linear(out).squeeze(1) # (dense -> 1)
         embed = self.embed(class_id)
 
