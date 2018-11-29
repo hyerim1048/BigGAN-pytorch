@@ -310,10 +310,10 @@ class Discriminator(nn.Module):
         out = F.relu(out)
         out = out.view(out.size(0), out.size(1), -1)
         out = out.sum(2)
-        out_linear = self.linear(out).squeeze(1)
+        out_linear = self.linear(out).squeeze(1) # (dense -> 1)
         embed = self.embed(class_id)
 
-        prod = (out * embed).sum(1) # class embed * out
+        prod = (out * embed).sum(1) # class embed(y) * out(h)
 
         # if self.debug == debug:
         #     print('class_id',class_id.size())
