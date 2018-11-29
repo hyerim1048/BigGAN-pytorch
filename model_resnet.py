@@ -126,9 +126,9 @@ class ConditionalNorm(nn.Module):
 
         self.bn = nn.BatchNorm2d(in_channel, affine=False)
 
-        self.embed = nn.Linear(n_condition, in_channel* 2)
-        self.embed.weight.data[:, :in_channel] = 1
-        self.embed.weight.data[:, in_channel:] = 0
+        self.embed = nn.Linear(n_condition, in_channel* 2) # in_channel  두배
+        self.embed.weight.data[:, :in_channel] = 1 # 감마 # 1로  weight 초기화
+        self.embed.weight.data[:, in_channel:] = 0 # 베타 # 0으로 weight 초기화
 
     def forward(self, input, class_id):
         out = self.bn(input)
@@ -139,8 +139,8 @@ class ConditionalNorm(nn.Module):
         # print(self.embed)
         embed = self.embed(class_id)
         # print('embed', embed.size())
-        gamma, beta = embed.chunk(2, 1)
-        gamma = gamma.unsqueeze(2).unsqueeze(3)
+        gamma, beta = embed.chunk(2, 1) 
+        gamma = gamma.unsqueeze(2).unsqueeze(3) # 1차원 추가 out 과 곱해짐
         beta = beta.unsqueeze(2).unsqueeze(3)
         # print(beta.size())
         out = gamma * out + beta
@@ -313,7 +313,7 @@ class Discriminator(nn.Module):
         out_linear = self.linear(out).squeeze(1)
         embed = self.embed(class_id)
 
-        prod = (out * embed).sum(1)
+        prod = (out * embed).sum(1) # class embed * out
 
         # if self.debug == debug:
         #     print('class_id',class_id.size())
